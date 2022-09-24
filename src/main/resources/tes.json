@@ -1,0 +1,17 @@
+{
+  "uuid": "michqql",
+  "player_ranks": [
+    {
+      "rank_id": "owner",
+      "temporary": false,
+      "expiry_timestamp": 0,
+      "prefix_placeholders": {
+        "colour": "red"
+      },
+      "suffix_placeholders": {
+        "plus_count": "+++"
+      }
+    }
+  ],
+  "prominent_rank": "owner"
+}

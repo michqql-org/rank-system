@@ -1,0 +1,15 @@
+name: RankSystem
+version: '${project.version}'
+main: me.michqql.ranksystem.RankSystemPlugin
+api-version: 1.18
+
+load: STARTUP
+
+softdepend:
+  - PlaceholderAPI
+
+commands:
+  rank:
+    aliases:
+      - ranks
+  grant: {}

@@ -1,0 +1,8 @@
+debug: true
+
+# The id of the default rank to give to new players
+# If left blank, no rank will be given
+default-rank: ''
+
+# Should the player receive the default permissions specified in permissions.yml for players
+give-default-bukkit-permissions: false
