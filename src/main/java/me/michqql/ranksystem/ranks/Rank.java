@@ -4,10 +4,7 @@ import me.michqql.ranksystem.PermissionUtil;
 import me.michqql.servercoreutils.util.collections.Pair;
 import org.bukkit.ChatColor;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Rank {
 
@@ -95,12 +92,70 @@ public class Rank {
         return nameColour;
     }
 
+    public String getTranslatableNameColour() {
+        if(nameColour == null)
+            return "";
+
+        StringBuilder builder = new StringBuilder();
+        builder.append('&').append(nameColour.getKey().getChar());
+        for(ChatColor colour : nameColour.getValue()) {
+            builder.append('&').append(colour.getChar());
+        }
+        return builder.toString();
+    }
+
+    public String getReadableNameColour() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(nameColour.getKey().getChar());
+
+        Iterator<ChatColor> iterator = nameColour.getValue().iterator();
+        if(iterator.hasNext())
+            builder.append(", ");
+
+        while(iterator.hasNext()) {
+            ChatColor colour = iterator.next();
+            builder.append(colour.getChar());
+            if(iterator.hasNext())
+                builder.append(", ");
+        }
+        return builder.toString();
+    }
+
     public void setNameColour(Pair<ChatColor, Set<ChatColor>> nameColour) {
         this.nameColour = nameColour;
     }
 
     public Pair<ChatColor, Set<ChatColor>> getChatColour() {
         return chatColour;
+    }
+
+    public String getTranslatableChatColour() {
+        if(chatColour == null)
+            return "";
+
+        StringBuilder builder = new StringBuilder();
+        builder.append('&').append(chatColour.getKey().getChar());
+        for(ChatColor colour : chatColour.getValue()) {
+            builder.append('&').append(colour.getChar());
+        }
+        return builder.toString();
+    }
+
+    public String getReadableChatColour() {
+        StringBuilder builder = new StringBuilder();
+        builder.append(chatColour.getKey().getChar());
+
+        Iterator<ChatColor> iterator = chatColour.getValue().iterator();
+        if(iterator.hasNext())
+            builder.append(", ");
+
+        while(iterator.hasNext()) {
+            ChatColor colour = iterator.next();
+            builder.append(colour.getChar());
+            if(iterator.hasNext())
+                builder.append(", ");
+        }
+        return builder.toString();
     }
 
     public void setChatColour(Pair<ChatColor, Set<ChatColor>> chatColour) {

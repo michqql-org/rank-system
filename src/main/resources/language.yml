@@ -1,0 +1,80 @@
+# Sent when the player does not have permission
+# %permission% - the permission required
+# %reqrank% - the lowest required rank to use it
+no-permission:
+  - '&cYou do not have permission to use this!'
+
+no-rank-with-id:
+  - '&cNo rank with id &f%id% &exists'
+
+# /rank
+rank-command-messages:
+  # Sent to the player or console when an unknown subcommand
+  # has been entered
+  # %label% - the command label (e.g. rank)
+  # %input% - the argument inputted
+  unknown-subcommand:
+    - '&cUnknown command /%label% %input%'
+
+  # Sent to the console when no input is given for the rank command
+  # (e.g. /rank)
+  list-ranks:
+    # Sent at the top of the list
+    # %order% - the method of ordering the ranks
+    header:
+      - '&7Listing all ranks [%order%]:'
+    # Message sent when there are no ranks to display
+    no-elements:
+      - '&7- &cNo ranks'
+    # The repeated element for each rank
+    # %rank.id% - the rank id
+    # %rank.weight% - the weight of the rank
+    # %rank.prefix% - the prefix of the rank
+    list-element:
+      - '&7- &f%rank.id% &e%rank.weight%'
+
+  # /rank create <id>
+  create:
+    # Sent when the player uses the command incorrectly
+    no-id:
+      - '&cPlease specify an ID, usage: /rank create <id>'
+
+    # Sent when a rank with the id already exists
+    # %id% - the id specified by the player
+    rank-with-id-exists:
+      - '&cA rank with ID &f%id% &calready exists!'
+
+    # Sent when the rank is created successfully
+    # %id% - the id specified by the player
+    # %rank...% - any of the ranks default properties
+    success:
+      - '&aSuccessfully created rank with ID &f%id%'
+      - '&aYou can edit the rank with &e/rank edit <%id%>'
+
+  # /rank edit <id>
+  edit:
+    # Sent to the console when it tries to edit the ranks in-game
+    requires-player:
+      - '&cYou must be a player to use the in-game editor'
+      - '&cInstead, please edit the rank files directly in RankSystem/ranks/....yml'
+
+    # Sent when the player uses the command incorrectly
+    no-id:
+      - '&cPlease specify an ID, usage: /rank edit <id>'
+
+    # Sent when the player tries to edit a rank that doesn't exist
+    # %id% - the id specified by the player
+    rank-with-id-doesnt-exist:
+      - "&cA rank with id &f%id% &cdoesn't exist"
+
+# /grant
+grant-command-messages:
+  usage:
+    console: '&cUsage: /grant <player> <rank> [time]'
+    player: '&cUsage: /grant <player> [time]'
+
+  player-not-found:
+    - '&cCould not find a player by name &f%name%'
+
+  granted:
+    - '&aGranted %player.name% rank %rank.id%'
