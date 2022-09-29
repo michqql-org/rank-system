@@ -5,8 +5,8 @@ import me.michqql.ranksystem.commands.ranks.RankCommandManager;
 import me.michqql.ranksystem.permissions.PermissionsManager;
 import me.michqql.ranksystem.players.PlayerManager;
 import me.michqql.ranksystem.ranks.RankManager;
-import me.michqql.ranksystem.util.PlayerRankPAPIExpansion;
-import me.michqql.ranksystem.util.RankPAPIExpansion;
+import me.michqql.ranksystem.integration.papi.PlayerRankPAPIExpansion;
+import me.michqql.ranksystem.integration.papi.RankPAPIExpansion;
 import me.michqql.servercoreutils.gui.GuiHandler;
 import me.michqql.servercoreutils.io.IO;
 import me.michqql.servercoreutils.util.MessageHandler;
@@ -39,6 +39,10 @@ public final class RankSystemPlugin extends JavaPlugin {
         // Register player manager as a listener
         Bukkit.getPluginManager().registerEvents(playerManager, this);
 
+        // Setup API
+        RankSystemAPI.setRankManager(rankManager);
+        RankSystemAPI.setPlayerManager(playerManager);
+
         // Register commands
         PluginCommand rankCommand = getCommand("rank");
         if(rankCommand != null) {
@@ -52,7 +56,7 @@ public final class RankSystemPlugin extends JavaPlugin {
         // Register placeholders - optional
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             // Placeholder API is installed on the server
-            new RankPAPIExpansion(rankManager).register();
+            new RankPAPIExpansion(messageHandler, rankManager).register();
             new PlayerRankPAPIExpansion(this, playerManager).register();
 
             getLogger().info("Integrated Placeholder API support");

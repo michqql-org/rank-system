@@ -106,7 +106,6 @@ public class GrantCommandManager extends BaseCommand {
                 } else {
                     PlayerRank pr = new PlayerRank(finalRank, !permanent, System.currentTimeMillis() + finalTime);
                     playerData.addPlayerRank(pr);
-                    sender.sendMessage("Granted " + input + " rank " + finalRank.getRankId());
                     messageHandler.sendList(sender, "grant-command-messages.granted", new HashMap<>() {{
                         put("player.name", input);
                         put("player.uuid", playerData.getUuid().toString());

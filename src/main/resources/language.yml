@@ -5,7 +5,7 @@ no-permission:
   - '&cYou do not have permission to use this!'
 
 no-rank-with-id:
-  - '&cNo rank with id &f%id% &exists'
+  - '&cNo rank with id &f%id% &cexists'
 
 # /rank
 rank-command-messages:
@@ -78,3 +78,6 @@ grant-command-messages:
 
   granted:
     - '&aGranted %player.name% rank %rank.id%'
+
+placeholder-api-messages:
+  rank-placeholder-error: 'No rank with id %id% exists'
