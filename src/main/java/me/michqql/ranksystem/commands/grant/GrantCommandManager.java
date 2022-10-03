@@ -8,14 +8,17 @@ import me.michqql.ranksystem.players.PlayerManager;
 import me.michqql.ranksystem.ranks.PlayerRank;
 import me.michqql.ranksystem.ranks.Rank;
 import me.michqql.ranksystem.ranks.RankManager;
+import me.michqql.ranksystem.util.Placeholders;
 import me.michqql.servercoreutils.commands.BaseCommand;
 import me.michqql.servercoreutils.gui.GuiHandler;
+import me.michqql.servercoreutils.util.MessageHandler;
 import me.michqql.servercoreutils.util.OfflineUUID;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
@@ -26,9 +29,9 @@ public class GrantCommandManager extends BaseCommand {
     private final RankManager rankManager;
     private final PlayerManager playerManager;
 
-    public GrantCommandManager(Plugin plugin, GuiHandler guiHandler,
+    public GrantCommandManager(Plugin plugin, MessageHandler messageHandler, GuiHandler guiHandler,
                                RankManager rankManager, PlayerManager playerManager) {
-        super(plugin);
+        super(plugin, messageHandler);
         this.guiHandler = guiHandler;
         this.rankManager = rankManager;
         this.playerManager = playerManager;
@@ -37,29 +40,34 @@ public class GrantCommandManager extends BaseCommand {
     @Override
     public void commandDefault(CommandSender sender, String input, String[] args) {
         if(!sender.hasPermission(RankSystemPlugin.GRANT_RANK_PERMISSION)) {
-            sender.sendMessage("You do not have permission to grant ranks!");
+            messageHandler.sendList(sender, "no-permission", new HashMap<>() {{
+                put("permission", RankSystemPlugin.GRANT_RANK_PERMISSION);
+                final Rank reqRank = rankManager.getLowestRankForPermission(RankSystemPlugin.GRANT_RANK_PERMISSION);
+                putAll(Placeholders.ofRank(reqRank, "reqrank"));
+            }});
             return;
         }
 
         final boolean isPlayer = sender instanceof Player;
         // grant <player> <rank> [time] <- console sender
         if(!isPlayer && args.length <= 1) {
-            sender.sendMessage("Usage: /grant <player> <rank> [time]");
+            messageHandler.sendList(sender, "grant-command-messages.usage.console");
             return;
         }
 
         // grant <player> [time]        <- player sender
         if(args.length == 0) {
-            sender.sendMessage("Usage: /grant <player> [time]");
+            messageHandler.sendList(sender, "grant-command-messages.usage.player");
             return;
         }
 
         // Get the rank id if the sender is a console sender
         Rank rank = null;
         if(!isPlayer) {
-            rank = rankManager.getRankById(args[1]);
+            String id = args[1];
+            rank = rankManager.getRankById(id);
             if(rank == null) {
-                sender.sendMessage("No rank with id " + args[1]);
+                messageHandler.sendList(sender, "no-rank-with-id", Placeholders.of("id", id));
                 return;
             }
         }
@@ -86,7 +94,8 @@ public class GrantCommandManager extends BaseCommand {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             UUID uuid = OfflineUUID.getUUID(input);
             if(uuid == null) {
-                sender.sendMessage("No player exists with name " + input);
+                messageHandler.sendList(sender, "grant-command-messages.player-not-found",
+                        Placeholders.of("name", input));
                 return;
             }
 
@@ -97,7 +106,11 @@ public class GrantCommandManager extends BaseCommand {
                 } else {
                     PlayerRank pr = new PlayerRank(finalRank, !permanent, System.currentTimeMillis() + finalTime);
                     playerData.addPlayerRank(pr);
-                    sender.sendMessage("Granted " + input + " rank " + finalRank.getRankId());
+                    messageHandler.sendList(sender, "grant-command-messages.granted", new HashMap<>() {{
+                        put("player.name", input);
+                        put("player.uuid", playerData.getUuid().toString());
+                        put("rank.id", finalRank.getRankId());
+                    }});
                 }
             });
         });

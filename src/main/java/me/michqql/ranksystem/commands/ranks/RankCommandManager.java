@@ -3,13 +3,18 @@ package me.michqql.ranksystem.commands.ranks;
 import me.michqql.ranksystem.RankSystemPlugin;
 import me.michqql.ranksystem.guis.RanksGui;
 import me.michqql.ranksystem.players.PlayerManager;
+import me.michqql.ranksystem.ranks.Rank;
 import me.michqql.ranksystem.ranks.RankManager;
+import me.michqql.ranksystem.util.Placeholders;
 import me.michqql.servercoreutils.commands.BaseCommand;
 import me.michqql.servercoreutils.gui.GuiHandler;
+import me.michqql.servercoreutils.util.MessageHandler;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RankCommandManager extends BaseCommand {
@@ -18,8 +23,8 @@ public class RankCommandManager extends BaseCommand {
     private final RankManager rankManager;
     private final PlayerManager playerManager;
 
-    public RankCommandManager(Plugin plugin, GuiHandler guiHandler, RankManager rankManager, PlayerManager playerManager) {
-        super(plugin);
+    public RankCommandManager(Plugin plugin, MessageHandler messageHandler, GuiHandler guiHandler, RankManager rankManager, PlayerManager playerManager) {
+        super(plugin, messageHandler);
         this.guiHandler = guiHandler;
         this.rankManager = rankManager;
         this.playerManager = playerManager;
@@ -28,17 +33,35 @@ public class RankCommandManager extends BaseCommand {
     @Override
     public void commandDefault(CommandSender sender, String input, String[] args) {
         if(args.length > 0) {
-            // TODO: Send unknown command message
+            messageHandler.sendList(sender, "rank-command-messages.unknown-subcommand", new HashMap<>() {{
+                put("label", "rank");
+                put("input", input);
+            }});
             return;
         }
 
         if(!(sender instanceof Player player)) {
-            // TODO: List ranks as message
+            LinkedList<Rank> ranks = rankManager.getOrderedRanks();
+            messageHandler.sendList(sender, "rank-command-messages.list-ranks.header", new HashMap<>() {{
+                put("order", "DESCENDING");
+            }});
+            if(ranks.isEmpty()) {
+                messageHandler.sendList(sender, "rank-command-messages.list-ranks.no-elements");
+            } else {
+                for(Rank rank : ranks) {
+                    messageHandler.sendList(sender, "rank-command-messages.list-ranks.list-element",
+                            Placeholders.ofRank(rank, "rank"));
+                }
+            }
             return;
         }
 
         if(!player.hasPermission(RankSystemPlugin.ADMIN_PERMISSION)) {
-            // TODO: Send no permission message
+            messageHandler.sendList(sender, "no-permission", new HashMap<>() {{
+                put("permission", RankSystemPlugin.ADMIN_PERMISSION);
+                final Rank reqRank = rankManager.getLowestRankForPermission(RankSystemPlugin.ADMIN_PERMISSION);
+                putAll(Placeholders.ofRank(reqRank, "reqrank"));
+            }});
             return;
         }
 
@@ -48,8 +71,8 @@ public class RankCommandManager extends BaseCommand {
     @Override
     protected void registerSubCommands() {
         children.addAll(List.of(
-                new CreateRankSubCommand(plugin, rankManager),
-                new EditRankSubCommand(plugin, guiHandler, rankManager, playerManager)
+                new CreateRankSubCommand(plugin, messageHandler, rankManager),
+                new EditRankSubCommand(plugin, messageHandler, guiHandler, rankManager, playerManager)
         ));
     }
 }

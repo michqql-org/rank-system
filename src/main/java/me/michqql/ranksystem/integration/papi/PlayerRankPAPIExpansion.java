@@ -1,4 +1,4 @@
-package me.michqql.ranksystem.util;
+package me.michqql.ranksystem.integration.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.michqql.ranksystem.RankSystemPlugin;

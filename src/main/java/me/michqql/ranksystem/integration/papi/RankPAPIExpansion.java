@@ -1,8 +1,10 @@
-package me.michqql.ranksystem.util;
+package me.michqql.ranksystem.integration.papi;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.michqql.ranksystem.ranks.Rank;
 import me.michqql.ranksystem.ranks.RankManager;
+import me.michqql.ranksystem.util.Placeholders;
+import me.michqql.servercoreutils.util.MessageHandler;
 import me.michqql.servercoreutils.util.collections.Pair;
 import org.bukkit.ChatColor;
 import org.bukkit.OfflinePlayer;
@@ -14,9 +16,11 @@ import java.util.Set;
 
 public class RankPAPIExpansion extends PlaceholderExpansion {
 
+    private final MessageHandler messageHandler;
     private final RankManager rankManager;
 
-    public RankPAPIExpansion(RankManager rankManager) {
+    public RankPAPIExpansion(MessageHandler messageHandler, RankManager rankManager) {
+        this.messageHandler = messageHandler;
         this.rankManager = rankManager;
     }
 
@@ -27,9 +31,12 @@ public class RankPAPIExpansion extends PlaceholderExpansion {
         if(args.length == 0)
             return "";
 
-        Rank rank = rankManager.getRankById(args[0]);
-        if(rank == null)
-            return ""; // TODO: add error messages
+        String rankId = args[0];
+        Rank rank = rankManager.getRankById(rankId);
+        if(rank == null) {
+            String errorMessage = messageHandler.getMessage("placeholder-api-messages.rank-placeholder-error");
+            return MessageHandler.replacePlaceholdersStatic(errorMessage, Placeholders.of("id", rankId));
+        }
 
         if(args.length <= 1)
             return rank.getRankId();

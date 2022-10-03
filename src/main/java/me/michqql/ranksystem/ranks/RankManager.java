@@ -4,6 +4,7 @@ import me.michqql.ranksystem.RankSystemPlugin;
 import me.michqql.ranksystem.Settings;
 import me.michqql.ranksystem.ranks.loader.JsonRankLoader;
 import me.michqql.ranksystem.ranks.loader.RankLoader;
+import me.michqql.ranksystem.ranks.collection.ListenerHashMap;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -12,7 +13,9 @@ public class RankManager {
 
     private final RankSystemPlugin plugin;
 
-    private final HashMap<String, Rank> ranks = new HashMap<>();
+    // Do not set any listener for now until the ranks have been loaded
+    private final ListenerHashMap<String, Rank> ranks = new ListenerHashMap<>();
+    private LinkedList<Rank> cachedOrderedRanks; // Ordered by descending weight
     private final RankLoader loader;
     private final boolean debug;
 
@@ -53,6 +56,10 @@ public class RankManager {
 
                 this.defaultRank = rank;
             }
+
+            // Fourthly, cache the ranks
+            this.ranks.setChangeRunnable(this::cacheRanks);
+            cacheRanks();
         });
     }
 
@@ -128,12 +135,27 @@ public class RankManager {
         }
     }
 
+    private void cacheRanks() {
+        LinkedList<Rank> ranks = new LinkedList<>(this.ranks.values());
+        ranks.sort((o1, o2) -> o2.getWeight() - o1.getWeight());
+        this.cachedOrderedRanks = ranks;
+    }
+
     public void onDisable() {
         loader.saveAllRanks(ranks.values());
     }
 
     public List<Rank> getRanks() {
         return new ArrayList<>(ranks.values());
+    }
+
+    /**
+     * @return the ranks in descending order
+     */
+    public LinkedList<Rank> getOrderedRanks() {
+        if(cachedOrderedRanks == null)
+            cacheRanks();
+        return new LinkedList<>(cachedOrderedRanks);
     }
 
     public Rank getRankById(String id) {
@@ -144,21 +166,32 @@ public class RankManager {
         return getRankById(id) != null;
     }
 
-    public boolean hasDefaultRank() {
-        return defaultRank != null;
+    public Rank getLowestRankForPermission(String permission) {
+        LinkedList<Rank> ordered = getOrderedRanks(); // In descending order
+
+        // Reverse the order to ascending order
+        Iterator<Rank> iterator = ordered.descendingIterator();
+        while(iterator.hasNext()) {
+            Rank rank = iterator.next();
+            if(rank.hasPermission(permission)) // this must be the lowest weighting rank with this permission
+                return rank;
+        }
+
+        return null;
     }
 
     public Rank getDefaultRank() {
         return defaultRank;
     }
 
-    public void createRank(String id) {
+    public Rank createRank(final String id) {
+        final Rank rank = new Rank(id);
         ranks.computeIfAbsent(id, id1 -> {
-            Rank rank = new Rank(id1);
             rank.giveDefaultValues();
             // Save the newly created rank
             loader.saveRank(rank);
             return rank;
         });
+        return rank;
     }
 }

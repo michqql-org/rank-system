@@ -7,6 +7,8 @@
 
 # IntelliJ
 out/
+target/
+src/test/
 
 # Compiled class file
 *.class
@@ -94,8 +96,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
-target/
 
 pom.xml.tag
 pom.xml.releaseBackup

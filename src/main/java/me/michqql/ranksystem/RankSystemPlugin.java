@@ -5,9 +5,11 @@ import me.michqql.ranksystem.commands.ranks.RankCommandManager;
 import me.michqql.ranksystem.permissions.PermissionsManager;
 import me.michqql.ranksystem.players.PlayerManager;
 import me.michqql.ranksystem.ranks.RankManager;
-import me.michqql.ranksystem.util.PlayerRankPAPIExpansion;
-import me.michqql.ranksystem.util.RankPAPIExpansion;
+import me.michqql.ranksystem.integration.papi.PlayerRankPAPIExpansion;
+import me.michqql.ranksystem.integration.papi.RankPAPIExpansion;
 import me.michqql.servercoreutils.gui.GuiHandler;
+import me.michqql.servercoreutils.io.IO;
+import me.michqql.servercoreutils.util.MessageHandler;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,26 +32,31 @@ public final class RankSystemPlugin extends JavaPlugin {
 
         // Load managers
         final GuiHandler guiHandler = new GuiHandler(this);
+        final MessageHandler messageHandler = new MessageHandler(IO.getYamlFile(this, "language.yml").getConfig());
         // Rank manager must be loaded before player manager, as the player data loader requires ranks to be loaded
         rankManager = new RankManager(this);
         playerManager = new PlayerManager(this, rankManager);
         // Register player manager as a listener
         Bukkit.getPluginManager().registerEvents(playerManager, this);
 
+        // Setup API
+        RankSystemAPI.setRankManager(rankManager);
+        RankSystemAPI.setPlayerManager(playerManager);
+
         // Register commands
         PluginCommand rankCommand = getCommand("rank");
         if(rankCommand != null) {
-            rankCommand.setExecutor(new RankCommandManager(this, guiHandler, rankManager, playerManager));
+            rankCommand.setExecutor(new RankCommandManager(this, messageHandler, guiHandler, rankManager, playerManager));
         }
         PluginCommand grantCommand = getCommand("grant");
         if(grantCommand != null) {
-            grantCommand.setExecutor(new GrantCommandManager(this, guiHandler, rankManager, playerManager));
+            grantCommand.setExecutor(new GrantCommandManager(this, messageHandler, guiHandler, rankManager, playerManager));
         }
 
         // Register placeholders - optional
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             // Placeholder API is installed on the server
-            new RankPAPIExpansion(rankManager).register();
+            new RankPAPIExpansion(messageHandler, rankManager).register();
             new PlayerRankPAPIExpansion(this, playerManager).register();
 
             getLogger().info("Integrated Placeholder API support");

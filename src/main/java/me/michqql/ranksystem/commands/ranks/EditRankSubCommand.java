@@ -5,8 +5,10 @@ import me.michqql.ranksystem.guis.editor.RankEditorGui;
 import me.michqql.ranksystem.players.PlayerManager;
 import me.michqql.ranksystem.ranks.Rank;
 import me.michqql.ranksystem.ranks.RankManager;
+import me.michqql.ranksystem.util.Placeholders;
 import me.michqql.servercoreutils.commands.SubCommand;
 import me.michqql.servercoreutils.gui.GuiHandler;
+import me.michqql.servercoreutils.util.MessageHandler;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -21,8 +23,8 @@ public class EditRankSubCommand extends SubCommand {
     private final RankManager rankManager;
     private final PlayerManager playerManager;
 
-    public EditRankSubCommand(Plugin plugin, GuiHandler guiHandler, RankManager rankManager, PlayerManager playerManager) {
-        super(plugin);
+    public EditRankSubCommand(Plugin plugin, MessageHandler messageHandler, GuiHandler guiHandler, RankManager rankManager, PlayerManager playerManager) {
+        super(plugin, messageHandler);
         this.guiHandler = guiHandler;
         this.rankManager = rankManager;
         this.playerManager = playerManager;
@@ -31,20 +33,20 @@ public class EditRankSubCommand extends SubCommand {
     @Override
     protected void onCommand(CommandSender sender, String[] args) {
         if(!(sender instanceof Player player)) {
-            sender.sendMessage(ChatColor.RED + "You must be a player to use the in-game editor");
-            sender.sendMessage(ChatColor.RED + "Instead, please edit the rank files directly");
+            messageHandler.sendList(sender, "rank-command-messages.edit.requires-player");
             return;
         }
 
         if(args.length == 0) {
-            sender.sendMessage(ChatColor.RED + "Usage: /rank edit <id>");
+            messageHandler.sendList(sender, "rank-command-messages.edit.no-id");
             return;
         }
 
         String id = args[0];
         Rank rank = rankManager.getRankById(id);
         if(rank == null) {
-            sender.sendMessage(ChatColor.RED + "A rank with id " + id + " does not exist");
+            messageHandler.sendList(sender, "rank-command-messages.edit.rank-with-id-doesnt-exist",
+                    Placeholders.of("id", id));
             return;
         }
 
